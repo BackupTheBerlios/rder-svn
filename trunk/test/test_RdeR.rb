@@ -27,4 +27,8 @@ class TC_RdeR < Test::Unit::TestCase
     assert_equal("ls()", $r.rexpr("ls"))
     assert_equal("ls(a, b, c)", $r.rexpr("ls",["a", "b", "c"]))
   end
+
+  def test_evalR
+    assert_nil($r.evalR("c")) # R: c() => NULL
+  end
 end
