@@ -5,24 +5,26 @@ require "RdeR.so"
 
 class RdeR
 
-#   def [](ls)
-#     ls + "()"
-#   end
-
   def method_missing(symbol, *args)
-
     symbol = symbol.id2name.delete("[]")
     if (symbol.size > 0)
       fnc = symbol.to_s
     else
       fnc = args.shift
     end
-    eval_test_R(fnc + "(" + args.to_s + ")")
+
+    eval_test_R(rexpr(symbol, *args))
+  end
+
+  def rexpr(symbol, *args)
+    "#{symbol}(#{args.join(", ")})"
   end
 
   def eval_test_R(expr)
     "Evaluate #{expr}"
   end
+
+
 end
 
 class RdeRException < Exception
