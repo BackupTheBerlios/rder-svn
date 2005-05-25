@@ -1,4 +1,5 @@
 require "mkmf"
-$CPPFLAGS += "-I/home/shinamon/src/source/R-2.1.0/src/include"
+$CPPFLAGS += "-I/usr/local/lib/R/include"
+$LDFLAGS += "-L/usr/local/lib/R/lib"
 $LOCAL_LIBS += "-lR"
 create_makefile("RdeR")
