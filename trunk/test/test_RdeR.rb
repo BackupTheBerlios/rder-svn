@@ -1,7 +1,8 @@
 require 'test/unit'
+
 require 'RdeR'
 
-class TC_RdeR < Test::Unit::TestCase
+class TestCaseRdeR < Test::Unit::TestCase
 
   $r = RdeR.new # Is this correct approach? --- mimamu
 

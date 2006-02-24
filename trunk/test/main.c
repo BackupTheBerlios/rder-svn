@@ -1,5 +1,6 @@
 #include <Rdefines.h>
-#include "ruby.h"
+#include <ruby.h>
+#include "rder.h"
 
 int main(int argc, char *argv)
 {
@@ -8,9 +9,9 @@ int main(int argc, char *argv)
 
   initR();
   //  Rf_PrintValue(res = eval_cR("sum"));
-  res = (SEXP) eval_cR("sum");
+  res = (SEXP) eval_Rfunc("sum");
 
   ruby = to_RubyObj(res);
 
-  return(0);
+  return 0;
 }

@@ -3,31 +3,45 @@
 
 require "RdeR.so"
 
-class RdeR
+module RdeR
 
-#   def method_missing(symbol, *args)
-#     symbol = symbol.id2name.delete("[]")
-#     if (symbol.size > 0)
-#       fnc = symbol.to_s
-#     else
-#       fnc = args.shift
-#     end
+  class R
+    
+    def method_missing(symbol, *args)
+      symbol = symbol.to_s
+      
+      if (symbol.size > 0)
+        fnc = symbol.to_s
+      else
+        fnc = args.shift
+      end
+      p rexpr(symbol, *args)
 
-#     eval_test_R(rexpr(symbol, *args))
-#   end
 
-  def rexpr(symbol, *args)
-    "#{symbol}(#{args.join(", ")})"
+      eval_test_R(rexpr(symbol, *args))
+    end
+    
+    def rexpr(symbol, *args)
+      "#{symbol}(#{args.join(", ")})"
+    end
+
+private
+
+    def eval_test_R(expr)
+      begin
+        #      res = evalR(expr)
+        res = evalR('seq')
+      rescue
+        raise RException, "RException"
+      end
+      
+      res
+    end
+    
   end
 
-  def eval_test_R(expr)
-    "Evaluate #{expr}"
-  end
-
+  class RException < Exception; end
 
 end
 
-class RdeRException < Exception
-  def initialize
-  end
-end
+

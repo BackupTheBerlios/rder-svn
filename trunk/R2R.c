@@ -24,6 +24,13 @@ VALUE to_RubyObj(SEXP robj){
 /*     reals = REAL(robj); // R to C */
 /*     ruby_obj = INT2FIX(reals); // C to Ruby */
 /*    break; */
+  case STRSXP:
+    ruby_obj = STRING_PTR(robj); // R to C
+      // C to Ruby
+    break;
+  default:
+    ruby_obj = Qtrue;
+    break;
   }
 
   return (ruby_obj);

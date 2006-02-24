@@ -11,8 +11,8 @@ p r.ls(r.plot("a"))
 
 p r.eval_R("sum")
 p r.eval_R("ls")
-r
-.quitR
+
+r.quitR
 
 q = RdeR.new
 p q.class

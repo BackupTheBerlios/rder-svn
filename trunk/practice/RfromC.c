@@ -1,5 +1,7 @@
 #include <Rdefines.h>
 
+char *get_last_error_msg();
+
 int main(int argc, char** argv)
 {
   SEXP expr, res, lsstr;
@@ -14,11 +16,29 @@ int main(int argc, char** argv)
   Rf_PrintValue(expr);
 
   PROTECT(lsstr = allocVector(LANGSXP, 1));
-  SETCAR(lsstr, install("ls"));
+  SETCAR(lsstr, install("be"));
   res = R_tryEval(lsstr, R_GlobalEnv, &errorOccured);
-  Rf_PrintValue(res);
+
+  if (errorOccured) {
+    printf("%s\n", get_last_error_msg());
+    //fflush(stderr);
+  } else {
+    Rf_PrintValue(res);
+  }
 
   UNPROTECT(2);
 
   return (0);
+}
+
+/* Obtain the text of the last R error message */
+char *get_last_error_msg() {
+  SEXP msg, res;
+
+  PROTECT(msg = allocVector(LANGSXP, 1));
+  SETCAR(msg, install("geterrmessage"));
+  res = R_tryEval(msg, R_GlobalEnv, NULL);
+
+  //  msg = do_eval_fun("geterrmessage");
+  return CHARACTER_VALUE(msg);
 }
