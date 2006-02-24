@@ -8,7 +8,7 @@ static VALUE R_finalize(VALUE);
 static VALUE R_evaluate(VALUE, VALUE);
 
 
-void Init_RdeR(void) {
+void Init_rder(void) {
 
   VALUE rb_mRdeR; // module RdeR
   VALUE rb_cR; // class R 
