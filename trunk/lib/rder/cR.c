@@ -21,8 +21,7 @@ SEXP eval_Rexpr(SEXP expr) {
   res = R_tryEval(expr, R_GlobalEnv, &errorOccured);
 
   if (errorOccured) {
-    rb_raise(rb_eException, get_last_error_msg());
-    // Raise Ruby exception
+    rb_raise(rb_eException, "%s", get_last_error_msg());
     return NULL;
   }
 
@@ -53,15 +52,17 @@ SEXP get_fun_from_name(char *ident) {
   SEXP obj;
 
   if (!*ident) {
-    rb_raise(rb_eException, 'attempt to use zero-length vaiable name');
     return NULL;
   }
 
   obj = Rf_findVar(Rf_install(ident), R_GlobalEnv);
 
-  if (obj != R_UnboundValue) {
-    obj = Rf_findFun(Rf_install(ident), R_GlobalEnv);
-  }
+/*   if (obj != R_UnboundValue) { */
+/*     obj = Rf_findFun(Rf_install(ident), R_GlobalEnv); */
+/*   } */
+
+  if (obj == R_UnboundValue)
+    rb_raise(rb_eRobjException, "There is no symbol \"%s\".", ident);
 
   return obj;
 }
@@ -69,8 +70,8 @@ SEXP get_fun_from_name(char *ident) {
 /* Obtain the text of the last R error message */
 char *get_last_error_msg() {
   SEXP msg;
-  msg = do_eval_fun("geterrmessage");
+  msg = (SEXP) eval_Rfunc("geterrmessage");
 
-  return CHARACTER_VALUE(msg);
+  return (char*) CHARACTER_VALUE(msg);
 }
 
