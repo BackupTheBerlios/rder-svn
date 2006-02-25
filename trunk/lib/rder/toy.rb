@@ -1,3 +1,5 @@
+$:.unshift('..')
+
 require 'rder'
 
 include RdeR
