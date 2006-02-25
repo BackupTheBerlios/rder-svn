@@ -17,7 +17,8 @@ static VALUE R_finalize(VALUE self) {
 static VALUE R_evaluate(VALUE self, VALUE f_name) {
   VALUE ret, robj;
   SEXP r_ret;
-  r_ret = (SEXP) eval_Rfunc(STR2CSTR(f_name));
+  //  r_ret = (SEXP) eval_Rfunc(STR2CSTR(f_name));
+  r_ret = (SEXP) eval_R_get(STR2CSTR(f_name));
   
   if (!r_ret) {
     rb_raise(rb_eException, "%s: R evaluation error.\n", r_ret);
@@ -32,21 +33,9 @@ static VALUE R_evaluate(VALUE self, VALUE f_name) {
   return robj;
 }
 
+
+
 // Robj class
-
-static VALUE to_RubyO(VALUE klass, SEXP robj)
-{
-  VALUE obj;
-  struct robj *ptr;
-
-  obj = Data_Make_Struct(klass, struct robj, 0, -1, ptr);
-  Data_Get_Struct(klass, struct robj, ptr);
-  ptr->RObj = robj;
-
-  return obj;
-}
-
-
 
 static VALUE
 robj_alloc(VALUE klass)
@@ -57,15 +46,15 @@ robj_alloc(VALUE klass)
 }
 
 static VALUE
-Robj_initialize(VALUE self)
+Robj_initialize(VALUE self, VALUE obj)
 {
   struct robj *ptr;
   SEXP robj;
 
   Data_Get_Struct(self, struct robj, ptr);
 
-  R_References = CONS(robj, R_References);
-  SET_SYMVALUE(install("R.References"), R_References);
+/*   R_References = CONS(robj, R_References); */
+/*   SET_SYMVALUE(install("R.References"), R_References); */
 
   ptr->RObj = robj;
   ptr->conversion = CONV_BASIC;
@@ -82,6 +71,22 @@ Robj_mode(VALUE self)
   return INT2NUM(ptr->conversion);
 }
 
+static VALUE
+Robj_size(VALUE self)
+{
+  struct robj *ptr;
+
+  Data_Get_Struct(self, struct robj, ptr);
+  int len = GET_LENGTH(ptr->RObj);
+  if (!len) {
+    return INT2FIX(0);
+  } else {
+    return INT2NUM(len);
+  }
+}
+
+
+
 // Initialize RdeR module
 void Init_rder(void) {
 
@@ -97,10 +102,12 @@ void Init_rder(void) {
   rb_eRException = rb_define_class("RException", rb_eException);
 
   rb_define_alloc_func(rb_cRobj, robj_alloc);
-  rb_define_private_method(rb_cRobj, "initialize", Robj_initialize, 0);
+  rb_define_private_method(rb_cRobj, "initialize", Robj_initialize, 1);
   rb_define_method(rb_cRobj, "mode", Robj_mode, 0);
-  rb_define_private_method(rb_cRobj, "to_RubyO", to_RubyO, 1);
+  rb_define_method(rb_cRobj, "size", Robj_mode, 0);
+
   rb_define_private_method(rb_cRobj, "to_RubyObj", to_RubyObj, 0);
+  rb_define_private_method(rb_cRobj, "to_RObj", to_RObj, 0);
 
   rb_eRobjException = rb_define_class("RobjException", rb_eException);
 }

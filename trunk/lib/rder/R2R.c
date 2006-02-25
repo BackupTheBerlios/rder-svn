@@ -48,7 +48,7 @@ to_RubyObj(VALUE self)
   Data_Get_Struct(self, struct robj, ptr);
   robj = ptr->RObj;
   int len = GET_LENGTH(robj);
-  
+printf("%i\n", len);  
   ruby_hash = rb_funcall(rb_cHash, rb_intern("new"), 0);
 
   for (i=0; i<len; i++) {
@@ -120,10 +120,26 @@ to_RubyObj(VALUE self)
   return ruby_hash;
 }
 
-SEXP to_RObj(VALUE ruby_obj) {
-  SEXP robj;
+static VALUE to_RObj(VALUE self, VALUE obj) {
 
-  if (!ruby_obj) {
-    return (NULL);
-  }
+  SEXP robj;
+  struct robj *ptr;
+
+  Data_Get_Struct(obj, struct robj, ptr);
+  robj = ptr->RObj;
+
+  int type = TYPE(self);
+
+  switch (type)
+    {
+    case T_NIL:
+      robj = R_NilValue;
+    case T_FIXNUM:
+      PROTECT(robj = NEW_INTEGER(1));
+      NUMERIC_DATA(robj)[0] = FIX2LONG(self);
+    default:
+      Qnil;
+    }
+  return obj;
 }
+

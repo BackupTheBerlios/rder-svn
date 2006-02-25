@@ -4,18 +4,18 @@ module RdeR
 
   class R
     
+    def print
+      self.to_s
+    end
+
     def method_missing(symbol, *args)
-      symbol = symbol.to_s
-      
-      if (symbol.size > 0)
-        fnc = symbol.to_s
-      else
-        fnc = args.shift
-      end
-      p rexpr(symbol, *args)
+      # We need manipurations of "[", "<-" etc.
+      fname = symbol.to_s
 
+      args = args.map { |arg| Robj.new(arg) }
+p args
 
-      eval_test_R(rexpr(symbol, *args))
+      fetch_R(fname)
     end
     
     def rexpr(symbol, *args)
@@ -24,10 +24,10 @@ module RdeR
 
 private
 
-    def eval_test_R(expr)
+    def fetch_R(expr)
       begin
-#        res = evalR(expr)
-        res = evalR('ls')
+        res = evalR(expr)
+#        res = evalR('ls')
       rescue
         raise RException, 'R Evaluation error.'
       end

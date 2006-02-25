@@ -21,7 +21,7 @@ SEXP eval_Rexpr(SEXP expr) {
   res = R_tryEval(expr, R_GlobalEnv, &errorOccured);
 
   if (errorOccured) {
-    rb_raise(rb_eException, "%s", get_last_error_msg());
+    rb_raise(rb_eRException, "%s", get_last_error_msg());
     return NULL;
   }
 
@@ -46,6 +46,25 @@ SEXP eval_Rfunc(char *fname) {
   return res;
 }
 
+SEXP eval_R_get(char *fname)
+{
+  SEXP expr, res;
+  int error;
+
+printf("fname: %s\n", fname);
+
+  PROTECT(expr = allocVector(LANGSXP, 2));
+  SETCAR(expr, install("get"));
+  SETCAR(CDR(expr), Rf_mkString(fname));
+  res = R_tryEval(expr, R_GlobalEnv, &error);
+
+  if (error) {
+    rb_raise(rb_eRException, "R execution exception. %s", expr);
+  }
+
+  UNPROTECT(1);
+  return res;
+}
 
 SEXP get_fun_from_name(char *ident) {
 
