@@ -22,7 +22,6 @@ SEXP eval_Rexpr(SEXP expr) {
 
   if (errorOccured) {
     rb_raise(rb_eRException, "%s", get_last_error_msg());
-    return NULL;
   }
 
   return (res);
@@ -94,3 +93,44 @@ char *get_last_error_msg() {
   return (char*) CHARACTER_VALUE(msg);
 }
 
+
+int makeargs(int nargs, VALUE args, SEXP *e)
+{
+  SEXP r;
+  int i;
+
+  for (i=0; i<nargs; i++) {
+    r = to_Robj(rb_ary_entry(args, i));
+    if (!r)
+      return 0;
+    SETCAR(*e, r);
+    *e = CDR(*e);
+  }
+  return 1;
+}
+
+static VALUE 
+robj_call(VALUE self, VALUE args)
+{
+  SEXP exp, e, res;
+  int nargs;
+  struct robj *ptr;
+  VALUE ruby_obj;
+
+  if (args)
+    nargs = NUM2INT(rb_ary_length(args));
+
+  PROTECT(exp = Rf_allocVector(LANGSXP, nargs+1));
+  e = exp;
+Rf_PrintValue(exp);
+  Data_Get_Struct(self, struct robj, ptr);
+  SETCAR(e, ptr->RObj);
+  e = CDR(e);
+  makeargs(nargs, args, &e);
+  PROTECT(res = eval_Rexpr(exp));
+  
+  ruby_obj = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
+  ptr->RObj = res;
+
+  return ruby_obj;
+}

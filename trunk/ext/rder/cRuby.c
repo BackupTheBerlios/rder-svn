@@ -51,6 +51,16 @@ robj_initialize(VALUE self, VALUE obj)
 {
   struct robj *ptr;
   SEXP robj;
+  int ruby_type;
+
+  ruby_type = TYPE(obj);
+  switch(ruby_type)
+    {
+    case T_FIXNUM:
+      robj = Rf_ScalarInteger(FIX2INT(obj));
+    default:
+      robj = R_NilValue;
+    }
 
   Data_Get_Struct(self, struct robj, ptr);
 
@@ -75,22 +85,27 @@ Robj_mode(VALUE self)
 static VALUE
 robj_length(VALUE self)
 {
+  VALUE rb_int;
+  int len;
   struct robj *ptr;
 
   Data_Get_Struct(self, struct robj, ptr);
-  int len = GET_LENGTH(ptr->RObj);
+  len = GET_LENGTH(ptr->RObj);
+
   if (!len) {
-    return INT2FIX(0);
+    rb_int = INT2FIX(0);
   } else {
-    return INT2NUM(len);
+    rb_int = INT2NUM(len);
   }
+  
+  return rb_int;
 }
+
 
 
 
 // Initialize RdeR module
 void Init_rder(void) {
-
 
   rb_mRdeR = rb_define_module("RdeR");
   rb_cR = rb_define_class_under(rb_mRdeR, "R", rb_cObject);
@@ -106,9 +121,6 @@ void Init_rder(void) {
   rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
   rb_define_method(rb_cRobj, "mode", Robj_mode, 0);
   rb_define_method(rb_cRobj, "length", robj_length, 0);
-
-  rb_define_method(rb_cRobj, "to_RubyObj", to_RubyObj, 0);
-  rb_define_method(rb_cRobj, "to_RObj", to_RObj, 0);
 
   rb_eRobjException = rb_define_class("RobjException", rb_eException);
 }

@@ -156,3 +156,25 @@ static VALUE to_RObj(VALUE self, VALUE obj) {
   return obj;
 }
 
+SEXP to_Robj(VALUE obj)
+{
+  SEXP robj;
+  int type;
+
+  if (obj == Qnil)
+    return R_NilValue;
+
+  type = TYPE(obj);
+  switch (type)
+    {
+    case T_NIL:
+      PROTECT(robj = R_NilValue);
+    default:
+      rb_raise(rb_eRobjException, "cannot convert from type %s", rb_class2name(obj));
+      PROTECT(robj = NULL);
+    }
+
+  UNPROTECT(1);
+  return robj;
+
+}

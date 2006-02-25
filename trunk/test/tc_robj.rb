@@ -15,9 +15,22 @@ class TC_Robj < Test::Unit::TestCase
   end
 
   def test_length
-    robj_c = $r.c
-    assert(true, robj_c).kind_of?(RdeR::Robj)
-    assert_equal(1, robj_c.length)
+    robj = $r.c
+    assert(true, robj).kind_of?(RdeR::Robj)
+    assert_equal(1, robj.length)
+
+    robj = $r.version # environment() returns 12 length 
+    assert_equal(12, robj.length)
+
+    robj = $r.c(1, 2, 3, 4)
+    assert_equal(4, robj.length)
   end
+
+  def test_to_rexp
+    robj = $r.c
+    robj.to_rexp
+  end
+
+  
 
 end

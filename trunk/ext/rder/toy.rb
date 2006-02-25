@@ -22,6 +22,14 @@ p robj1.length
 #p r.geterrmessage
 
 
+
+begin
+
+rescue
+end
+
+puts 'END'
+
 r.close
 
 
