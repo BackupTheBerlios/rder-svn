@@ -1,9 +1,4 @@
-
-# Subversion keyword: $Id: RdeR.rb 1068 2005-05-16 02:06:54Z shinamon $
-
-$:.unshift '.'
-
-require "rder.so"
+require "rder/rder.so"
 
 module RdeR
 
