@@ -1,10 +1,11 @@
+$:.unshift('lib')
+
 require 'test/unit'
+require 'rder'
 
-require 'RdeR'
+class TestCaseR < Test::Unit::TestCase
 
-class TestCaseRdeR < Test::Unit::TestCase
-
-  $r = RdeR.new # Is this correct approach? --- mimamu
+  $r = RdeR::R.new # Is this correct approach? --- mimamu
 
   def setup
 
@@ -14,7 +15,7 @@ class TestCaseRdeR < Test::Unit::TestCase
   end
 
   def test_klass
-    assert_equal("RdeR", $r.class.to_s)
+    assert_equal(RdeR::R, $r.class)
   end
 
 #   def test_method_missing
@@ -24,12 +25,7 @@ class TestCaseRdeR < Test::Unit::TestCase
 #     assert_equal("Evaluate plot()", $r.plot)
 #   end
   
-  def test_rexpr
-    assert_equal("ls()", $r.rexpr("ls"))
-    assert_equal("ls(a, b, c)", $r.rexpr("ls",["a", "b", "c"]))
-  end
-
   def test_evalR
-    assert_nil($r.evalR("c")) # R: c() => NULL
+    assert_equal(true, $r.evalR("c").kind_of?(RdeR::Robj))
   end
 end
