@@ -31,18 +31,16 @@ private
 
     def eval_test_R(expr)
       begin
-        #      res = evalR(expr)
-        res = evalR('seq')
+#        res = evalR(expr)
+        res = evalR('ls')
       rescue
-        raise RException, "RException"
+        raise RException, 'R Evaluation error.'
       end
       
       res
     end
     
   end
-
-  class RException < Exception; end
 
 end
 
