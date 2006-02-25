@@ -1,4 +1,4 @@
-$:.unshift('..')
+$LOAD_PATH.unshift('../../lib', '../ext/rder')
 
 require 'rder'
 
