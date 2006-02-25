@@ -9,6 +9,7 @@ static VALUE R_evaluate(VALUE, VALUE);
 
 static VALUE robj_alloc(VALUE);
 static VALUE Robj_initialize(VALUE, VALUE);
+static VALUE Robj_length(VALUE);
 
 static SEXP R_References;
 
@@ -35,6 +36,7 @@ char *get_last_error_msg();
 // for R2R
 static VALUE to_RubyObj(VALUE);
 static VALUE to_RObj(VALUE, VALUE);
+
 
 
 static VALUE rb_eRException;

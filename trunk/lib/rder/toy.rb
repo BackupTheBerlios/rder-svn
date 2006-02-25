@@ -14,7 +14,9 @@ p r.c('a', 'b')
 
 #p robj2 = r.get_last_error_message
 
-p robj1.size
+robj2 = r.ls
+p robj2.length
+p robj1.length
 #p robj2.size
 
 #p r.geterrmessage

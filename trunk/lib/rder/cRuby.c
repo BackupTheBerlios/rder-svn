@@ -28,6 +28,7 @@ static VALUE R_evaluate(VALUE self, VALUE f_name) {
 
   robj = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
   ptr->RObj = r_ret;
+
   ptr->conversion = 3;
 
   return robj;
@@ -46,7 +47,7 @@ robj_alloc(VALUE klass)
 }
 
 static VALUE
-Robj_initialize(VALUE self, VALUE obj)
+robj_initialize(VALUE self, VALUE obj)
 {
   struct robj *ptr;
   SEXP robj;
@@ -72,7 +73,7 @@ Robj_mode(VALUE self)
 }
 
 static VALUE
-Robj_size(VALUE self)
+robj_length(VALUE self)
 {
   struct robj *ptr;
 
@@ -102,12 +103,12 @@ void Init_rder(void) {
   rb_eRException = rb_define_class("RException", rb_eException);
 
   rb_define_alloc_func(rb_cRobj, robj_alloc);
-  rb_define_private_method(rb_cRobj, "initialize", Robj_initialize, 1);
+  rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
   rb_define_method(rb_cRobj, "mode", Robj_mode, 0);
-  rb_define_method(rb_cRobj, "size", Robj_mode, 0);
+  rb_define_method(rb_cRobj, "length", robj_length, 0);
 
-  rb_define_private_method(rb_cRobj, "to_RubyObj", to_RubyObj, 0);
-  rb_define_private_method(rb_cRobj, "to_RObj", to_RObj, 0);
+  rb_define_method(rb_cRobj, "to_RubyObj", to_RubyObj, 0);
+  rb_define_method(rb_cRobj, "to_RObj", to_RObj, 0);
 
   rb_eRobjException = rb_define_class("RobjException", rb_eException);
 }

@@ -41,21 +41,22 @@ to_RubyObj(VALUE self)
 
   int i, *integers;
 
-  VALUE ruby_hash;
+  VALUE ruby_hash, ruby_arr, ruby_robj;
   SEXP robj;
   struct robj *ptr;
+  SEXP str_p;
 
   Data_Get_Struct(self, struct robj, ptr);
   robj = ptr->RObj;
   int len = GET_LENGTH(robj);
-printf("%i\n", len);  
-  ruby_hash = rb_funcall(rb_cHash, rb_intern("new"), 0);
+
+  ruby_arr = rb_ary_new();
 
   for (i=0; i<len; i++) {
     switch(TYPEOF(robj)) 
       {
       case NILSXP:
-	rb_funcall(ruby_hash, rb_intern("store"), 2, INT2FIX(i), Qnil);
+	ruby_robj = Qnil;
 	break;
       case SYMSXP:
 	break;
@@ -92,6 +93,9 @@ printf("%i\n", len);
       case CPLXSXP:
 	break;
       case STRSXP:
+	//	str_p = *STRING_PTR(robj);
+	//	Rf_PrintValue(str_p);
+	ruby_robj = rb_str_new2(CHAR(robj));
 	break;
       case DOTSXP:
 	break;
@@ -115,9 +119,18 @@ printf("%i\n", len);
 	ruby_hash = Qtrue;
 	break;
       }
+    ruby_arr = rb_ary_push(ruby_arr, ruby_robj);
   }
   
-  return ruby_hash;
+  return ruby_arr;
+}
+
+static VALUE
+to_str(VALUE self)
+{
+  SEXP robj;
+  VALUE ruby_obj;
+  
 }
 
 static VALUE to_RObj(VALUE self, VALUE obj) {
