@@ -1,9 +1,10 @@
-$:.unshift('lib')
-
-require 'test/unit'
+$LOAD_PATH.unshift('lib', 'ext/rder')
 require 'rder'
 
-class TestCaseR < Test::Unit::TestCase
+require 'test/unit'
+
+
+class TC_R < Test::Unit::TestCase
 
   $r = RdeR::R.new # Is this correct approach? --- mimamu
 
@@ -26,6 +27,7 @@ class TestCaseR < Test::Unit::TestCase
 #   end
   
   def test_evalR
-    assert_equal(true, $r.evalR("c").kind_of?(RdeR::Robj))
+    assert(true, $r.evalR("c").kind_of?(RdeR::Robj))
   end
+
 end
