@@ -1,0 +1,15 @@
+* RdeR -- Ruby de R vice versa
+
+We provide Ruby extended library for GNU R.
+
+* Requirements
+The author is developing this library under the following environment:
+
+- GNU R 2.2.1 or higher
+- Ruby 1.8.4 or higher
+
+* Licence
+GPL
+
+* Contact
+mimamu @ gmail.com
