@@ -12,11 +12,11 @@ int main(int argc, char** argv)
   
   PROTECT(expr = allocVector(REALSXP, 1));
   REAL(expr)[0] = 123.45;
-  defineVar(install("mimamu"), expr, R_GlobalEnv);
+  defineVar(Rf_install("foo"), expr, R_GlobalEnv);
   Rf_PrintValue(expr);
 
   PROTECT(lsstr = allocVector(LANGSXP, 1));
-  SETCAR(lsstr, install("be"));
+  SETCAR(lsstr, Rf_install("version"));
   res = R_tryEval(lsstr, R_GlobalEnv, &errorOccured);
 
   if (errorOccured) {
