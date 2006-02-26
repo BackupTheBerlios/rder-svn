@@ -170,6 +170,11 @@ SEXP to_REXP(VALUE obj)
       //      PROTECT(robj = R_NilValue);
       robj = R_NilValue;
       break;
+    case T_FIXNUM:
+printf("switch T_FIXNUM: in to_REXP\n");
+      robj = NEW_INTEGER(1);
+      INTEGER_DATA(robj)[0] = (int) FIX2INT(obj);
+      break;
     case T_STRING:
       //      printf("switch T_STRING: in to_REXP\n");
       robj = Rf_mkString(RSTRING(obj)->ptr);
