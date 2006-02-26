@@ -51,9 +51,9 @@ robj_initialize(VALUE self, VALUE r_fname)
 {
   struct robj *ptr;
 
-  Data_Get_Struct(self, struct robj*, ptr);
+  Data_Get_Struct(self, struct robj, ptr);
 
-  ptr->RObj = R_get_function(RSTRING(r_fname)->ptr);
+  ptr->RObj = (SEXP) R_get_function(RSTRING(r_fname)->ptr);
   ptr->conversion = CONV_BASIC;
 
 
@@ -61,6 +61,18 @@ robj_initialize(VALUE self, VALUE r_fname)
   //  Rf_PrintValue(rexp);
 
   return Qnil;
+}
+
+static VALUE 
+robj_s_function(VALUE self, VALUE r_fname)
+{
+  struct robj *ptr;
+  VALUE rfunc;
+
+  rfunc = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
+  ptr->RObj = (SEXP) R_get_function(RSTRING(r_fname)->ptr);
+
+  return rfunc;
 }
 
 static VALUE
@@ -88,7 +100,7 @@ robj_eval(VALUE self)
   SEXP rexp, tmp, res;
   struct robj *ptr;
 
-  Data_Get_Struct(self, struct robj*, ptr);
+  Data_Get_Struct(self, struct robj, ptr);
   rexp = ptr->RObj;
 
   printf("REXP: ");
@@ -99,7 +111,7 @@ robj_eval(VALUE self)
   PROTECT(rexp);
   PROTECT(tmp = allocVector(LANGSXP, 1));
   SETCAR(tmp, rexp);
-  PROTECT(res = eval_Rexpr(tmp));
+  PROTECT(res = (SEXP) eval_Rexpr(tmp));
   UNPROTECT(3);
 
   printf("---- EALUATE! ---- \n");  
@@ -138,21 +150,29 @@ void Init_rder(void) {
   
   // module RdeR
   rb_mRdeR = rb_define_module("RdeR");
-  rb_cR = rb_define_class_under(rb_mRdeR, "R", rb_cObject);
-  rb_cRobj = rb_define_class_under(rb_mRdeR, "Robj", rb_cObject);
 
   // class R
+  rb_cR = rb_define_class_under(rb_mRdeR, "R", rb_cObject);
+
   rb_define_method(rb_cR, "initialize", R_initialize, 0);
   rb_define_method(rb_cR, "close", R_finalize, 0);
 
   rb_eRException = rb_define_class("RException", rb_eException);
 
   // class Robj
+  rb_cRobj = rb_define_class_under(rb_mRdeR, "Robj", rb_cObject);
+
   rb_define_alloc_func(rb_cRobj, robj_alloc);
+
   rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
+
+  rb_define_singleton_method(rb_cRobj, "function", robj_s_function, 1);
+
   rb_define_method(rb_cRobj, "length", robj_length, 0);
   rb_define_method(rb_cRobj, "args=", robj_set_args, 1);
   rb_define_method(rb_cRobj, "eval", robj_eval, 0);
+
+
 
   rb_eRobjException = rb_define_class("RobjException", rb_eException);
 }

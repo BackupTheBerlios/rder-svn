@@ -8,9 +8,20 @@ module RdeR
       # We need manipurations of "[", "[[", "<-" etc.
       fname = symbol.to_s
 
-      robj = Robj.new(fname, args)
+      robj = Robj.function(fname)
+      robj.args = args
+
+      return robj
+      # robj.mock_eval
+
     end
-        
+    
+  end
+
+  class Robj
+    def mock_eval
+      'evaluating my R expression...'
+    end
   end
 
 end

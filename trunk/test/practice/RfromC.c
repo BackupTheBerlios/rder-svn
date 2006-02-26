@@ -16,7 +16,8 @@ int main(int argc, char** argv)
   Rf_PrintValue(expr);
 
   PROTECT(lsstr = allocVector(LANGSXP, 1));
-  SETCAR(lsstr, Rf_install("version"));
+  //  SETCAR(lsstr, Rf_install("version"));
+  SETCAR(lsstr, Rf_install("c"));
   res = R_tryEval(lsstr, R_GlobalEnv, &errorOccured);
 
   if (errorOccured) {

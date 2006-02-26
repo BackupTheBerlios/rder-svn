@@ -13,13 +13,12 @@ p r.kind_of?(R)
 
 #p Robj.new(nil)#.eval
 
-r_c = Robj.new('c') # equivalents to r.c
-r_c.args = [1]
+
+r_c = Robj.function('c')
+
 p res = r_c.eval # shuld be 
 
 p res.kind_of?(Robj)
-
-p res.public_methods
 
 #p Robj.new('ls').eval
 # p Robj.new('version').eval # version is not a R function.

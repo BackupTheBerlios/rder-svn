@@ -8,8 +8,9 @@ static VALUE R_finalize(VALUE);
 static VALUE R_evaluate(VALUE, VALUE);
 
 static VALUE robj_alloc(VALUE);
-static VALUE Robj_initialize(VALUE, VALUE);
-static VALUE Robj_length(VALUE);
+static VALUE robj_initialize(VALUE, VALUE);
+static VALUE robj_p_function(VALUE, VALUE);
+static VALUE robj_length(VALUE);
 
 static SEXP R_References;
 
