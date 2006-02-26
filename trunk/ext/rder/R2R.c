@@ -156,25 +156,30 @@ static VALUE to_RObj(VALUE self, VALUE obj) {
   return obj;
 }
 
-SEXP to_Robj(VALUE obj)
+SEXP to_REXP(VALUE obj)
 {
   SEXP robj;
-  int type;
+  int ruby_type;
 
-  if (obj == Qnil)
-    return R_NilValue;
+  ruby_type = rb_type(obj);
 
-  type = TYPE(obj);
-  switch (type)
+  switch (ruby_type)
     {
     case T_NIL:
-      PROTECT(robj = R_NilValue);
+      //      printf("switch T_NIL: in to_REXP\n");
+      //      PROTECT(robj = R_NilValue);
+      robj = R_NilValue;
+      break;
+    case T_STRING:
+      //      printf("switch T_STRING: in to_REXP\n");
+      robj = Rf_mkString(RSTRING(obj)->ptr);
+      break;
     default:
-      rb_raise(rb_eRobjException, "cannot convert from type %s", rb_class2name(obj));
-      PROTECT(robj = NULL);
+      // printf("switch default: in to_REXP\n");
+      robj = NULL;
     }
 
-  UNPROTECT(1);
-  return robj;
+  //  UNPROTECT(1);
 
+  return robj;
 }

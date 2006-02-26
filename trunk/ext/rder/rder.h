@@ -37,6 +37,8 @@ char *get_last_error_msg();
 static VALUE to_RubyObj(VALUE);
 static VALUE to_RObj(VALUE, VALUE);
 
+VALUE to_Robj(VALUE);
+
 static VALUE robj_call(VALUE, VALUE);
 
 static VALUE rb_eRException;

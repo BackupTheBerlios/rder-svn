@@ -5,18 +5,40 @@ require 'rder'
 include RdeR
 #p R.public_methods.sort
 
-r = R.new
+r = R.new # R Engine starts
+
 p r.class
 p r.kind_of?(RdeR)
 p r.kind_of?(R)
-p robj1 = r.c()
-p r.c('a', 'b')
+
+#p Robj.new(nil)#.eval
+
+r_c = Robj.new('c') # equivalents to r.c
+r_c.args = [1]
+p res = r_c.eval # shuld be 
+
+p res.kind_of?(Robj)
+
+p res.public_methods
+
+#p Robj.new('ls').eval
+# p Robj.new('version').eval # version is not a R function.
+
+__END__
+
+p r.version
+
+
+
+p robj1 = r.c
+#p r.c('a', 'b')
 
 #p robj2 = r.get_last_error_message
 
 robj2 = r.ls
-p robj2.length
-p robj1.length
+p robj2
+# p robj2.length
+# p robj1.length
 #p robj2.size
 
 #p r.geterrmessage
@@ -30,6 +52,6 @@ end
 
 puts 'END'
 
-r.close
+r.close # R Engine stops
 
 

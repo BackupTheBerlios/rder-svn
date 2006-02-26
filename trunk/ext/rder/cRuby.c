@@ -47,39 +47,20 @@ robj_alloc(VALUE klass)
 }
 
 static VALUE
-robj_initialize(VALUE self, VALUE obj)
+robj_initialize(VALUE self, VALUE r_fname)
 {
   struct robj *ptr;
-  SEXP robj;
-  int ruby_type;
 
-  ruby_type = TYPE(obj);
-  switch(ruby_type)
-    {
-    case T_FIXNUM:
-      robj = Rf_ScalarInteger(FIX2INT(obj));
-    default:
-      robj = R_NilValue;
-    }
+  Data_Get_Struct(self, struct robj*, ptr);
 
-  Data_Get_Struct(self, struct robj, ptr);
-
-/*   R_References = CONS(robj, R_References); */
-/*   SET_SYMVALUE(install("R.References"), R_References); */
-
-  ptr->RObj = robj;
+  ptr->RObj = R_get_function(RSTRING(r_fname)->ptr);
   ptr->conversion = CONV_BASIC;
 
+
+  SEXP rexp = ptr->RObj;
+  //  Rf_PrintValue(rexp);
+
   return Qnil;
-}
-
-static VALUE
-Robj_mode(VALUE self)
-{
-  struct robj *ptr;
-
-  Data_Get_Struct(self, struct robj, ptr);
-  return INT2NUM(ptr->conversion);
 }
 
 static VALUE
@@ -101,26 +82,77 @@ robj_length(VALUE self)
   return rb_int;
 }
 
+static VALUE
+robj_eval(VALUE self)
+{
+  SEXP rexp, tmp, res;
+  struct robj *ptr;
+
+  Data_Get_Struct(self, struct robj*, ptr);
+  rexp = ptr->RObj;
+
+  printf("REXP: ");
+  Rf_PrintValue(rexp);
 
 
+
+  PROTECT(rexp);
+  PROTECT(tmp = allocVector(LANGSXP, 1));
+  SETCAR(tmp, rexp);
+  PROTECT(res = eval_Rexpr(tmp));
+  UNPROTECT(3);
+
+  printf("---- EALUATE! ---- \n");  
+
+  printf("Result: ");
+  Rf_PrintValue(res);
+
+  VALUE obj;
+  obj = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
+  ptr->RObj = (SEXP) res;
+
+  return obj;
+  //  return Qnil;
+}
+
+
+// static VALUE robj_get_args(VALUE self) {}
+
+static VALUE 
+robj_set_args(VALUE self, VALUE args)
+{
+  long nargs;
+  struct robj *e;
+
+  args = rb_Array(args); // corece to Array class with to_a
+  nargs = LONG2NUM(RARRAY(args)->len);
+
+  Data_Get_Struct(self, struct robj, e);
+
+  makeargs(nargs, args, &e);
+  return Qnil;
+}
 
 // Initialize RdeR module
 void Init_rder(void) {
-
+  
+  // module RdeR
   rb_mRdeR = rb_define_module("RdeR");
   rb_cR = rb_define_class_under(rb_mRdeR, "R", rb_cObject);
   rb_cRobj = rb_define_class_under(rb_mRdeR, "Robj", rb_cObject);
 
+  // class R
   rb_define_method(rb_cR, "initialize", R_initialize, 0);
   rb_define_method(rb_cR, "close", R_finalize, 0);
-  rb_define_method(rb_cR, "evalR", R_evaluate, 1);
 
   rb_eRException = rb_define_class("RException", rb_eException);
 
+  // class Robj
   rb_define_alloc_func(rb_cRobj, robj_alloc);
   rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
-  rb_define_method(rb_cRobj, "mode", Robj_mode, 0);
   rb_define_method(rb_cRobj, "length", robj_length, 0);
+  rb_define_method(rb_cRobj, "args=", robj_set_args, 1);
+  rb_define_method(rb_cRobj, "eval", robj_eval, 0);
 
   rb_eRobjException = rb_define_class("RobjException", rb_eException);
 }
