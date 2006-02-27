@@ -1,8 +1,5 @@
 #include "rder.h"
 
-
-
-
 static VALUE R_initialize(VALUE self) {
   initR();
   return Qnil;
@@ -24,12 +21,13 @@ static VALUE R_evaluate(VALUE self, VALUE f_name) {
     rb_raise(rb_eException, "%s: R evaluation error.\n", r_ret);
   }
 
-  struct robj *ptr;
+  //struct robj *ptr;
 
-  robj = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
-  ptr->RObj = r_ret;
+  //  robj = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
+  //ptr->RObj = r_ret;
 
-  ptr->conversion = 3;
+  //ptr->conversion = 3;
+
 
   return robj;
 }
@@ -41,107 +39,30 @@ static VALUE R_evaluate(VALUE self, VALUE f_name) {
 static VALUE
 robj_alloc(VALUE klass)
 {
-  struct robj *ptr = ALLOC(struct robj);
+  ROBJ *robj = ALLOC(ROBJ);
 
-  return Data_Wrap_Struct(klass, 0, -1, ptr);
+  return Data_Wrap_Struct(klass, 0, -1, robj);
 }
 
 static VALUE
-robj_initialize(VALUE self, VALUE r_fname)
+robj_initialize(VALUE self, VALUE obj)
 {
-  struct robj *ptr;
+  ROBJ *robj;
 
-  Data_Get_Struct(self, struct robj, ptr);
-
-  ptr->RObj = (SEXP) R_get_function(RSTRING(r_fname)->ptr);
-  ptr->conversion = CONV_BASIC;
-
-
-  SEXP rexp = ptr->RObj;
-  //  Rf_PrintValue(rexp);
+  Data_Get_Struct(self, ROBJ, robj);
+  // NOT YET some initializations
 
   return Qnil;
 }
-
-static VALUE 
-robj_s_function(VALUE self, VALUE r_fname)
-{
-  struct robj *ptr;
-  VALUE rfunc;
-
-  rfunc = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
-  ptr->RObj = (SEXP) R_get_function(RSTRING(r_fname)->ptr);
-
-  return rfunc;
-}
-
-static VALUE
-robj_length(VALUE self)
-{
-  VALUE rb_int;
-  int len;
-  struct robj *ptr;
-
-  Data_Get_Struct(self, struct robj, ptr);
-  len = GET_LENGTH(ptr->RObj);
-
-  if (!len) {
-    rb_int = INT2FIX(0);
-  } else {
-    rb_int = INT2NUM(len);
-  }
-  
-  return rb_int;
-}
-
-static VALUE
-robj_eval(VALUE self)
-{
-  SEXP rexp, tmp, res;
-  struct robj *ptr;
-
-  Data_Get_Struct(self, struct robj, ptr);
-  rexp = ptr->RObj;
-
-  printf("REXP: ");
-  Rf_PrintValue(rexp);
-
-
-
-  PROTECT(rexp);
-  PROTECT(tmp = allocVector(LANGSXP, 1));
-  SETCAR(tmp, rexp);
-  PROTECT(res = (SEXP) eval_Rexpr(tmp));
-  UNPROTECT(3);
-
-  printf("---- EALUATE! ---- \n");  
-
-  printf("Result: ");
-  Rf_PrintValue(res);
-
-  VALUE obj;
-  obj = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
-  ptr->RObj = (SEXP) res;
-
-  return obj;
-  //  return Qnil;
-}
-
 
 // static VALUE robj_get_args(VALUE self) {}
 
 static VALUE 
 robj_set_args(VALUE self, VALUE args)
 {
-  long nargs;
-  struct robj *e;
 
   args = rb_Array(args); // corece to Array class with to_a
-  nargs = LONG2NUM(RARRAY(args)->len);
 
-  Data_Get_Struct(self, struct robj, e);
-
-  makeargs(nargs, args, &e);
   return Qnil;
 }
 
@@ -164,15 +85,10 @@ void Init_rder(void) {
 
   rb_define_alloc_func(rb_cRobj, robj_alloc);
 
+  //  rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
   rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
 
-  rb_define_singleton_method(rb_cRobj, "function", robj_s_function, 1);
-
-  rb_define_method(rb_cRobj, "length", robj_length, 0);
   rb_define_method(rb_cRobj, "args=", robj_set_args, 1);
-  rb_define_method(rb_cRobj, "eval", robj_eval, 0);
-
-
 
   rb_eRobjException = rb_define_class("RobjException", rb_eException);
 }
