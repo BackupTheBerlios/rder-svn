@@ -20,12 +20,11 @@ VALUE rb_mRdeR;
 VALUE rb_cR;
 VALUE rb_cRobj;
 
-struct robj {
+typedef struct robj {
   SEXP RObj;
   char *symbol;
   int conversion;
-};
-
+} ROBJ;
 
 
 void initR(void);
