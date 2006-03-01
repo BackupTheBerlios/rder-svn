@@ -1,128 +1,108 @@
 #include "rder.h"
 
-VALUE to_ubyObj(SEXP robj){
-  VALUE ruby_obj;
-
-  int *integers;
-  char *strings;
-  double *reals;
-
-  switch (TYPEOF(robj)) {
-  case NILSXP:
-    ruby_obj = Qnil;
-    break;
-  case INTSXP:
-    integers = INTEGER(robj); // R to C
-    ruby_obj = INT2FIX(*integers); // C to Ruby
-
-    //    if (TYPE(ruby_obj) == T_FIXNUM) printf("FIXNUM\n");
-
-    //    printf("INT %i\n", *integers);
-    break;
-/*   case REALSXP: */
-/*     reals = REAL(robj); // R to C */
-/*     ruby_obj = INT2FIX(reals); // C to Ruby */
-/*    break; */
-  case STRSXP:
-    //    strings = STRING_PTR(robj); // R to C
-      // C to Ruby
-    break;
-  default:
-    ruby_obj = Qtrue;
-    break;
-  }
-
-  return (ruby_obj);
-}
-
-static VALUE 
-to_RubyObj(VALUE self)
+int
+to_RubyObj(SEXP rexp, VALUE ruby_ary)
 {
+  int i, *integers, type;
+  long length;
 
-  int i, *integers;
-
-  VALUE ruby_hash, ruby_arr, ruby_robj;
-  SEXP robj;
-  struct robj *ptr;
+  VALUE ruby_hash, ruby_obj;
+  ROBJ *robj_p;
   SEXP str_p;
 
-  Data_Get_Struct(self, struct robj, ptr);
-  robj = ptr->RObj;
-  int len = GET_LENGTH(robj);
+  length = GET_LENGTH(rexp);
+  type = TYPEOF(rexp);
+    printf("%i\n", length);
+  ruby_ary = rb_ary_new();
 
-  ruby_arr = rb_ary_new();
+  for (i=0; i<length; i++) {
+    printf("TYPE: %i\n", type);
+    if (type == NILSXP) {
+      ruby_obj = Qnil;
+    } else if (type == INTSXP) {
+      int *integers = INTEGER(rexp);
+      ruby_obj = INT2NUM(*integers);
 
-  for (i=0; i<len; i++) {
-    switch(TYPEOF(robj)) 
-      {
-      case NILSXP:
-	ruby_robj = Qnil;
-	break;
-      case SYMSXP:
-	break;
-      case LISTSXP:
-	break;
-      case CLOSXP:
-	break;
-      case ENVSXP:
-	break;
-      case PROMSXP:
-	break;
-      case LANGSXP:
-	break;
-      case SPECIALSXP:
-	break;
-      case BUILTINSXP:
-	break;
-      case CHARSXP:
-	break;
-      case LGLSXP:
-	integers = INTEGER(robj);
-	if (integers[i] == NA_INTEGER) {
+    } else if (type == CLOSXP) {
+      char *m = "masashi";
+      ruby_obj = rb_str_new(0, 0);
+      printf("'%s'\n", StringValuePtr(ruby_obj));
+    } else {
+      printf("EXCEPTION: %i\n", type);
+      return 0; // failed
+    }
+    
+    ruby_ary = rb_ary_push(ruby_ary, ruby_obj);
 
-	} else {
+/*     switch(TYPEOF(rexp))  */
+/*       { */
+/*       case NILSXP: */
+/* 	ruby_obj = Qnil; */
+/* 	break; */
+/*       case SYMSXP: */
+/* 	break; */
+/*       case LISTSXP: */
+/* 	break; */
+/*       case CLOSXP: */
+/* 	break; */
+/*       case ENVSXP: */
+/* 	break; */
+/*       case PROMSXP: */
+/* 	break; */
+/*       case LANGSXP: */
+/* 	break; */
+/*       case SPECIALSXP: */
+/* 	break; */
+/*       case BUILTINSXP: */
+/* 	break; */
+/*       case CHARSXP: */
+/* 	break; */
+/*       case LGLSXP: */
+/* 	integers = INTEGER(robj); */
+/* 	if (integers[i] == NA_INTEGER) { */
+
+/* 	} else { */
 	  
-	}
-	break;
-      case INTSXP:
-	integers = INTEGER(robj);
-	integers[i] = INT2FIX(integers[i]);
-	break;
-      case REALSXP:
-	break;
-      case CPLXSXP:
-	break;
-      case STRSXP:
-	//	str_p = *STRING_PTR(robj);
-	//	Rf_PrintValue(str_p);
-	ruby_robj = rb_str_new2(CHAR(robj));
-	break;
-      case DOTSXP:
-	break;
-      case ANYSXP:
-	break;
-      case VECSXP:
-	break;
-      case EXPRSXP:
-	break;
-      case BCODESXP:
-	break;
-      case EXTPTRSXP:
-	break;
-      case WEAKREFSXP:
-	break;
-      case RAWSXP:
-	break;
-      case FUNSXP:
-	break;
-      default:
-	ruby_hash = Qtrue;
-	break;
-      }
-    ruby_arr = rb_ary_push(ruby_arr, ruby_robj);
+/* 	} */
+/* 	break; */
+/*       case INTSXP: */
+/* 	integers = INTEGER(robj); */
+/* 	integers[i] = INT2FIX(integers[i]); */
+/* 	break; */
+/*       case REALSXP: */
+/* 	break; */
+/*       case CPLXSXP: */
+/* 	break; */
+/*       case STRSXP: */
+/* 	//	str_p = *STRING_PTR(robj); */
+/* 	//	Rf_PrintValue(str_p); */
+/* 	ruby_robj = rb_str_new2(CHAR(robj)); */
+/* 	break; */
+/*       case DOTSXP: */
+/* 	break; */
+/*       case ANYSXP: */
+/* 	break; */
+/*       case VECSXP: */
+/* 	break; */
+/*       case EXPRSXP: */
+/* 	break; */
+/*       case BCODESXP: */
+/* 	break; */
+/*       case EXTPTRSXP: */
+/* 	break; */
+/*       case WEAKREFSXP: */
+/* 	break; */
+/*       case RAWSXP: */
+/* 	break; */
+/*       case FUNSXP: */
+/* 	break; */
+/*       default: */
+/* 	ruby_hash = Qtrue; */
+/* 	break; */
+/*       } */
   }
   
-  return ruby_arr;
+  return 1;
 }
 
 static VALUE
@@ -137,9 +117,6 @@ static VALUE to_RObj(VALUE self, VALUE obj) {
 
   SEXP robj;
   struct robj *ptr;
-
-  Data_Get_Struct(obj, struct robj, ptr);
-  robj = ptr->RObj;
 
   int type = TYPE(self);
 
