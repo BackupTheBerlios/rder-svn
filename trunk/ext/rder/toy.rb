@@ -5,7 +5,16 @@ require 'rder'
 include RdeR
 #p R.public_methods.sort
 
+c = Robj.new('c')
+p c.r_class
+p c.r_class = 'function'
+
 r = R.new # R Engine starts
+
+#p r.c.class
+p r.ls
+p r.sum
+#p r.version
 
 p r.class
 p r.kind_of?(RdeR)
@@ -13,12 +22,6 @@ p r.kind_of?(R)
 
 #p Robj.new(nil)#.eval
 
-
-r_c = Robj.function('c')
-
-p res = r_c.eval # shuld be 
-
-p res.kind_of?(Robj)
 
 #p Robj.new('ls').eval
 # p Robj.new('version').eval # version is not a R function.
@@ -36,9 +39,6 @@ p robj1 = r.c
 
 robj2 = r.ls
 p robj2
-# p robj2.length
-# p robj1.length
-#p robj2.size
 
 #p r.geterrmessage
 

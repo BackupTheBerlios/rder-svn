@@ -10,26 +10,58 @@ static VALUE R_finalize(VALUE self) {
   return Qnil;
 }
 
+static VALUE r_evaluate(VALUE self, VALUE obj) {
+  VALUE res, robj;
+  SEXP r_res;
+  int conv_success;
+  char *symbol, *klass_name;
 
-static VALUE R_evaluate(VALUE self, VALUE f_name) {
-  VALUE ret, robj;
-  SEXP r_ret;
-  //  r_ret = (SEXP) eval_Rfunc(STR2CSTR(f_name));
-  r_ret = (SEXP) eval_R_get(STR2CSTR(f_name));
+  symbol = StringValuePtr(obj);
+  printf("%s\n", symbol);
+
+  r_res = Rf_findVar(Rf_install(symbol), R_GlobalEnv);
+  if (r_res == R_UnboundValue) {
+    rb_raise(rb_eRException, "There is no symbol: '%s.'", symbol);
+  }
   
-  if (!r_ret) {
-    rb_raise(rb_eException, "%s: R evaluation error.\n", r_ret);
+  r_res = (SEXP) get_rexp(symbol);
+
+  if (!r_res) {
+    rb_raise(rb_eRException, "R evaluation error.\n");
   }
 
-  //struct robj *ptr;
+  //  robj = rb_class_new(rb_cObject);
+  robj = rb_ary_new();
 
-  //  robj = Data_Make_Struct(rb_cRobj, struct robj, 0, -1, ptr);
-  //ptr->RObj = r_ret;
+  conv_success = to_RubyObj(r_res, robj);
 
-  //ptr->conversion = 3;
-
+  if (!conv_success) {
+    rb_raise(rb_eRException, "The conversion for this type is not implemented yet.");
+    return Qnil; // dummy
+  }
 
   return robj;
+}
+
+SEXP
+get_rexp(char *symbol)
+{
+  SEXP res, rexp;
+  int error;
+
+  PROTECT(rexp = allocVector(LANGSXP, 2));
+  SETCAR(rexp, Rf_install("get"));
+  SETCAR(CDR(rexp), Rf_mkString(symbol));
+  res = R_tryEval(rexp, R_GlobalEnv, &error);
+  
+  if (error) {
+    UNPROTECT(1);
+    return NULL;
+  }
+  
+  UNPROTECT(1);
+  return res;
+
 }
 
 
@@ -51,6 +83,7 @@ robj_initialize(VALUE self, VALUE obj)
 
   Data_Get_Struct(self, ROBJ, robj);
   // NOT YET some initializations
+  robj->class = "object";
 
   return Qnil;
 }
@@ -66,8 +99,35 @@ robj_set_args(VALUE self, VALUE args)
   return Qnil;
 }
 
+static VALUE
+robj_r_class_get(VALUE self)
+{
+  ROBJ *robj;
+  char *r_class;
+
+  Data_Get_Struct(self, ROBJ, robj);
+  r_class = robj->class;
+  
+  return rb_str_new(r_class, strlen(r_class));
+}
+
+static VALUE 
+robj_r_class_set(VALUE self, VALUE rc_name)
+{
+  ROBJ *robj;
+  char *r_class;
+
+  r_class = StringValuePtr(rc_name);
+
+  Data_Get_Struct(self, ROBJ, robj);
+  robj->class = r_class;
+
+  return rc_name;
+}
+
 // Initialize RdeR module
-void Init_rder(void) {
+void 
+Init_rder(void) {
   
   // module RdeR
   rb_mRdeR = rb_define_module("RdeR");
@@ -77,6 +137,7 @@ void Init_rder(void) {
 
   rb_define_method(rb_cR, "initialize", R_initialize, 0);
   rb_define_method(rb_cR, "close", R_finalize, 0);
+  rb_define_method(rb_cR, "reval", r_evaluate, 1);
 
   rb_eRException = rb_define_class("RException", rb_eException);
 
@@ -87,7 +148,8 @@ void Init_rder(void) {
 
   //  rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
   rb_define_private_method(rb_cRobj, "initialize", robj_initialize, 1);
-
+  rb_define_method(rb_cRobj, "r_class", robj_r_class_get, 0);
+  rb_define_method(rb_cRobj, "r_class=", robj_r_class_set, 1);
   rb_define_method(rb_cRobj, "args=", robj_set_args, 1);
 
   rb_eRobjException = rb_define_class("RobjException", rb_eException);
